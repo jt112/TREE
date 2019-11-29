@@ -1,0 +1,105 @@
+//g++  5.4.0
+ 
+#include<bits/stdc++.h>
+using namespace std;
+ 
+#define ff first
+#define ss second
+#define pb push_back
+#define pii pair< int,int >
+#define fast ios::sync_with_stdio(0) , cin.tie(0) , cout.tie(0) ;
+ 
+const int N = 2e5+5;
+vector<int> g[N] , col(N) , tin(N) , tout(N) , sz(N) , ans(N),  cnt(N,0) , rev(N) ;
+map < int ,int > freq;
+int timer = 0;
+ 
+void dfs(int v,int p)
+{
+    sz[v] = 1;
+    rev[timer] = v;
+    tin[v] = timer++;
+    for(auto &it:g[v])
+    {
+        if(it!=p)
+        {
+            dfs(it,v);
+            sz[v] += sz[it];
+        }
+    }
+    tout[v] = timer;
+    return ;
+}
+ 
+void dfs_hld(int v,int p,bool keep)
+{
+    int maxi = -1;
+    int special_child = -1;
+    for(auto &it : g[v])
+    {
+        if(it!=p)
+        {
+            if(maxi < sz[it])
+            {
+                maxi = sz[it];
+                special_child = it;
+            }
+        }
+    }
+ 
+    for(auto &it : g[v])
+        if(it!=p && it!= special_child)
+            dfs_hld(it,v,0);
+    if(maxi != -1)
+        dfs_hld(special_child,v,1);
+ 
+    for(auto &it : g[v])
+    {
+        if(it!=p && it!= special_child)
+        {
+            for(int i=tin[it];i<tout[it];i++)
+            {
+                int x = rev[i];
+                freq[col[x]]++;
+                //whatever doing new in this part
+            }
+        }
+    }
+    freq[col[v]]++;
+    ans[v] = (int)(freq.size());
+ 
+    //whatever doing new in this part
+ 
+    if(keep == 0)
+    {
+        for(int i=tin[v];i<tout[v];i++)
+        {
+            int x = rev[i];
+            freq[col[x]]--;
+            if( !freq[col[x]] )
+                freq.erase(col[x]);
+              //whatever doing new in this part
+        }
+    }
+    return ;
+}
+signed main()
+{
+    fast;
+    int n ;
+    cin >> n ;
+    for(int i=1; i<=n ; i++) cin>>col[i];
+    for(int i=2; i<=n ; i++)
+    {
+        int u ,v;
+        cin >> u >> v ;
+        g[u].pb(v);
+        g[v].pb(u);
+    }
+    dfs(1,0);
+    dfs_hld(1,0,0);
+    for(int i=1 ; i<=n ; i++ )
+    {
+        cout << ans[i] << " " ;
+    }
+}

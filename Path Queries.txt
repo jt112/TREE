@@ -1,0 +1,114 @@
+//g++  5.4.0
+ 
+#include<bits/stdc++.h>
+using namespace std;
+ 
+#define ff first
+#define ss second
+#define pb push_back
+#define int long long
+#define pii pair< int,int >
+#define fast ios::sync_with_stdio(0) , cin.tie(0) , cout.tie(0) ;
+#define L(p) 2*p+1
+#define R(p) 2*p+2
+ 
+const int nax = 2e5+10;
+vector<int> g[nax] , val(nax) , tin(nax) , tout(nax) , rev(2*nax) ;
+int timer = 1;
+ 
+void dfs(int v,int p)
+{
+    rev[timer] = val[v];
+    tin[v] = timer++;
+    for(auto &it:g[v])
+        if(it!=p)
+            dfs(it,v);
+    rev[timer] = -val[v];
+    tout[v] = timer++;
+    return ;
+}
+ 
+int jt[8*nax];
+ 
+int fun(int a,int b)
+{
+    return a+b; // whatever u wish
+}
+void build(int l , int h , int p )
+{
+	if(l == h)
+	{
+		jt[p] = rev[l] ;
+		return;
+	}
+	int m = (l+h)>>1;
+	build(l , m , L(p));
+	build(m+1 , h , R(p));
+	jt[p] = fun(jt[L(p)],jt[R(p)]);
+	return;
+}
+ 
+void update(int l ,int h , int p, int q)
+{
+	if( l == h )
+    {
+        jt[p] = rev[l];
+        return ;
+    }
+	int m = (l + h )>> 1;
+	if( m >= q ) update( l , m , L(p) ,q);
+    else     	 update(m+1 , h , R(p) , q);
+	jt[p] = fun(jt[L(p)],jt[R(p)]);
+	return;
+}
+ 
+int query(int l,int h, int p, int ql ,int qh)
+{
+	if(l > qh || h < ql)
+		return 0;
+	else if(l >= ql && h <= qh)
+		return jt[p] ;
+	int m = (l + h )>> 1;
+	int p1 = query( l , m , L(p) ,ql ,qh);
+	int p2 = query(m+1 , h , R(p) , ql ,qh);
+	return fun(p1,p2);
+}
+ 
+signed main()
+{
+    fast;
+    int n , q;
+    cin >> n >> q;
+    for(int i=1; i<=n ; i++) cin>>val[i];
+    for(int i=2; i<=n ; i++)
+    {
+        int u ,v;
+        cin >> u >> v ;
+        g[u].pb(v);
+        g[v].pb(u);
+    }
+    dfs(1,0);
+ 
+    build( 1,2*n,0);
+    for(int i=1 ; i<=q ; i++ )
+    {
+        int t;
+        cin >> t;
+        if( t == 1 )
+        {
+            int a, b;
+            cin >> a >> b;
+            val[ a ] = b;
+            rev[ tin[a] ] = val[a];
+            rev[tout[a] ] = -val[a];
+            update( 1,2*n,0,tin[a] );
+            update( 1,2*n,0,tout[a]);
+        }
+        else
+        {
+            int p;
+            cin >> p;
+            cout << query( 1,2*n,0, 1 , tin[p] ) << "\n";
+        }
+    }
+}

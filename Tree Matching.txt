@@ -1,0 +1,40 @@
+//g++  5.4.0
+ 
+#include<bits/stdc++.h>
+using namespace std;
+ 
+#define ff first
+#define ss second
+#define pb push_back
+#define pii pair< int,int >
+#define fast ios::sync_with_stdio(0) , cin.tie(0) , cout.tie(0) ;
+ 
+const int nax = 2e5+5;
+vector<int> g[nax] , dp1(nax,0) , dp2(nax,0);
+ 
+void dfs(int v,int p)
+{
+    for( auto &i : g[v] )
+        if( i!=p )
+            dfs( i , v ) , dp2[v] += dp1[i] ;
+ 
+    for( auto &i : g[v] )
+        if( i!=p )
+            dp1[v] = max( dp1[v] , dp2[v] - dp1[i] + dp2[i] + 1 );
+    return;
+}
+signed main()
+{
+    fast;
+    int n;
+    cin >> n;
+    for(int i=2; i<=n ; i++)
+    {
+        int u ,v;
+        cin >> u >> v ;
+        g[u].pb(v);
+        g[v].pb(u);
+    }
+    dfs(1,0);
+    cout << max( dp1[1] , dp2[1] );
+}

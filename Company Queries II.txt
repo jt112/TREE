@@ -1,0 +1,76 @@
+//g++  5.4.0
+ 
+#include<bits/stdc++.h>
+using namespace std;
+ 
+#define ff first
+#define ss second
+#define pb push_back
+#define pii pair< int,int >
+#define fast ios::sync_with_stdio(0) , cin.tie(0) , cout.tie(0) ;
+ 
+const int nax = 2e5+5;
+const int lg = 18;
+vector<int> g[nax],  lev(nax, 0) , ans(nax,0);
+int par[nax][lg] ;
+ 
+void dfs(int v,int p)
+{
+    lev[v] = lev[p]+1;
+    par[v][0] = p;
+    for( auto &i : g[v] )
+        if( i!=p )
+            dfs( i , v );
+}
+ 
+void work(int n)
+{
+    for(int i=1; i<lg ; i++ )
+        for(int j=1 ; j<=n ; j++ )
+            if( par[j][i-1] )
+                par[j][i] = par[par[j][i-1]][i-1];
+}
+ 
+int lca(int u, int v)
+{
+    if( lev[u] > lev[v] ) swap(u,v);
+    int diff = lev[v] - lev[u];
+    for(int i=0; i<lg ; i++ )
+    {
+        if( ((1<<i)&diff) ) v = par[v][i];
+    }
+    if( v == u ) return v;
+    for( int i=lg-1 ; i>= 0 ; i-- )
+    {
+        if( par[v][i] != par[u][i] )
+            u = par[u][i] , v = par[v][i];
+    }
+    return par[v][0];
+}
+ 
+int query(int v,int k)
+{
+    return lca(v,k);
+}
+signed main()
+{
+    fast;
+    int n , q;
+    cin >> n >> q;
+    for(int i=2; i<=n ; i++)
+    {
+        int u;
+        cin >> u;
+        g[u].pb(i);
+    }
+    dfs(1,0);
+    work(n);
+    for(int i=1 ; i<=q ; i++ )
+    {
+        int u,v;
+        cin >> u >> v;
+        int p = query( u,v );
+        cout << p << "\n";
+    }
+ 
+}
